@@ -147,11 +147,15 @@ export function initializeDatabase() {
 
   // Insert default settings
   const defaultSettings = [
-    ['ai.provider', '"anthropic"', 'ai', 'AI provider: anthropic or openai', '{"type":"string","enum":["anthropic","openai"]}'],
+    ['ai.provider', '"anthropic"', 'ai', 'AI provider: anthropic, openai, or nvidia', '{"type":"string","enum":["anthropic","openai","nvidia"]}'],
     ['ai.model', '"claude-3-5-sonnet-20241022"', 'ai', 'Model to use', '{"type":"string"}'],
     ['ai.api_key', '""', 'ai', 'API key (user provides)', '{"type":"string"}'],
+    ['ai.base_url', '""', 'ai', 'Custom base URL for OpenAI-compatible APIs (NVIDIA NIM, local, etc.)', '{"type":"string"}'],
     ['ai.max_tokens', '8192', 'ai', 'Max output tokens', '{"type":"integer","minimum":1024,"maximum":32768}'],
     ['ai.temperature', '0.1', 'ai', 'Sampling temperature', '{"type":"number","minimum":0,"maximum":2}'],
+    ['bot.telegram_token', '""', 'bot', 'Telegram bot token from @BotFather', '{"type":"string"}'],
+    ['bot.telegram_allowed_users', '[]', 'bot', 'Allowed Telegram user IDs (JSON array, empty = all)', '{"type":"array","items":{"type":"string"}}'],
+    ['bot.whatsapp_session', '""', 'bot', 'WhatsApp session data (baileys)', '{"type":"string"}'],
     ['editor.tab_size', '2', 'editor', 'Tab size in spaces', '{"type":"integer","minimum":1,"maximum":8}'],
     ['editor.line_numbers', 'true', 'editor', 'Show line numbers', '{"type":"boolean"}'],
     ['editor.word_wrap', 'false', 'editor', 'Enable word wrap', '{"type":"boolean"}'],

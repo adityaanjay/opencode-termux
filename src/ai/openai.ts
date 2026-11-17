@@ -5,8 +5,8 @@ export class OpenAIProvider implements AIProvider {
   name = 'openai';
   private client: OpenAI;
 
-  constructor(apiKey: string) {
-    this.client = new OpenAI({ apiKey });
+  constructor(apiKey: string, baseUrl?: string) {
+    this.client = new OpenAI({ apiKey, baseURL: baseUrl });
   }
 
   async *streamChat(

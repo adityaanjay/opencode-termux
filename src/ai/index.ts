@@ -103,9 +103,11 @@ export const AVAILABLE_TOOLS: Tool[] = [
 export async function createAIProvider(): Promise<AIProvider> {
   const providerSetting = await db.select().from(settings).where(eq(settings.key, 'ai.provider')).get();
   const apiKeySetting = await db.select().from(settings).where(eq(settings.key, 'ai.api_key')).get();
+  const baseUrlSetting = await db.select().from(settings).where(eq(settings.key, 'ai.base_url')).get();
 
   const provider = providerSetting?.value?.replace(/"/g, '') || 'anthropic';
   const apiKey = apiKeySetting?.value?.replace(/"/g, '') || '';
+  const baseUrl = baseUrlSetting?.value?.replace(/"/g, '') || undefined;
 
   if (!apiKey) {
     throw new Error('API key not configured. Run /config to set ai.api_key');
@@ -115,7 +117,8 @@ export async function createAIProvider(): Promise<AIProvider> {
     case 'anthropic':
       return new AnthropicProvider(apiKey);
     case 'openai':
-      return new OpenAIProvider(apiKey);
+    case 'nvidia':
+      return new OpenAIProvider(apiKey, baseUrl);
     default:
       throw new Error(`Unknown provider: ${provider}`);
   }

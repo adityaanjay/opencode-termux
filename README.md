@@ -6,7 +6,8 @@ AI coding agent untuk Termux Android — clean-room rebuild dari [opencode](http
 
 ## Fitur
 
-- **Chat AI streaming** — Konversasi real-time dengan Anthropic Claude / OpenAI GPT
+- **Chat AI streaming** — Konversasi real-time dengan Anthropic Claude / OpenAI GPT / NVIDIA NIM
+- **Multi-provider support** — Anthropic, OpenAI, NVIDIA NIM (OpenAI-compatible), lokal (Ollama, vLLM, dll)
 - **Agent switching** — Tekan `Tab` untuk ganti agent: `build` (coding), `plan` (read-only), `general`
 - **File operations** — `@file` baca file, AI bisa read/write/edit file via tools
 - **Shell commands** — `!command` jalankan perintah shell langsung
@@ -15,6 +16,8 @@ AI coding agent untuk Termux Android — clean-room rebuild dari [opencode](http
 - **LSP integration** — Code intelligence (go to definition, hover, dll) via vscode-languageserver
 - **Local-first** — Database SQLite + WAL mode, tidak butuh server
 - **Optional cloud sync** — Siap untuk sinkronisasi sesi ke cloud (coming soon)
+- **Telegram Bot** — Jalankan AI agent sebagai bot Telegram (`/bot telegram`)
+- **WhatsApp Bot** — Jalankan AI agent sebagai bot WhatsApp via Baileys (`/bot whatsapp`)
 
 ## Prasyarat
 
@@ -72,9 +75,29 @@ Pertama kali jalan, set API key via slash command:
 /config anthropic sk-ant-xxxxxxxxxxxx
 # atau
 /config openai sk-xxxxxxxxxxxx
+# atau NVIDIA NIM / OpenAI-compatible endpoint
+/config nvidia sk-xxxxxxxxxxxx
 ```
 
 Key tersimpan di database lokal (`data/opencode.db`), tidak keluar dari device.
+
+### NVIDIA NIM / Custom OpenAI-compatible Endpoint
+
+Untuk NVIDIA NIM atau endpoint OpenAI-compatible lain (Ollama, vLLM, LocalAI, dll):
+
+```
+/config nvidia sk-dummy
+/config base_url http://localhost:8000/v1
+/config model meta/llama-3.1-70b-instruct
+```
+
+Atau set via `/config` sekali:
+```
+/config nvidia sk-dummy
+# lalu edit base_url dan model di menu /config
+```
+
+Base URL default untuk NVIDIA NIM: `https://integrate.api.nvidia.com/v1`
 
 ## Penggunaan Dasar
 
@@ -85,10 +108,19 @@ Key tersimpan di database lokal (`data/opencode.db`), tidak keluar dari device.
 | `@file` | Baca file & kirim ke AI |
 | `/help` | Bantuan |
 | `/session` | Kelola sesi |
-| `/config` | Set API key / model / temperature |
+| `/config` | Set API key / model / temperature / base_url |
 | `/new` | Sesi baru |
 | `/clear` | Bersihkan chat |
 | `Esc` | Tutup dialog / cancel |
+
+### Bot Commands
+
+| Command | Aksi |
+|---------|------|
+| `/bot telegram` | Start Telegram bot |
+| `/bot whatsapp` | Start WhatsApp bot (scan QR first run) |
+| `/bot stop` | Stop bots (restart app) |
+| `/bot status` | Cek status bot |
 
 ### Contoh
 
@@ -99,6 +131,23 @@ Key tersimpan di database lokal (`data/opencode.db`), tidak keluar dari device.
 > /config anthropic sk-ant-xxx
 > /session
 ```
+
+### Bot Usage
+
+**Telegram Bot:**
+1. Buat bot via @BotFather di Telegram, dapatkan token
+2. Set token: `/config telegram_token 123456:ABC-DEF...`
+3. (Optional) Batasi user: `/config telegram_allowed_users ["123456789", "987654321"]`
+4. Jalankan: `/bot telegram`
+5. Chat dengan bot di Telegram
+
+**WhatsApp Bot:**
+1. Jalankan: `/bot whatsapp`
+2. Scan QR code yang muncul di terminal dengan WhatsApp HP
+3. Bot siap digunakan (session tersimpan otomatis)
+4. Chat ke nomor WhatsApp yang terhubung
+
+**Catatan:** Bot menggunakan session dan tools yang sama dengan TUI. Bot bisa baca/tulis file, jalankan command, dsb.
 
 ## Arsitektur Singkat
 
@@ -111,13 +160,17 @@ src/
 │   ├── index.ts      # Bun:sqlite connection, WAL mode
 │   └── push.ts       # Migration runner
 ├── ai/
-│   ├── providers/    # Anthropic & OpenAI streaming
+│   ├── providers/    # Anthropic, OpenAI, NVIDIA streaming
 │   ├── tools/        # 6 tools: read/write/edit/run/list/grep
 │   └── types.ts      # Message, ToolCall types
+├── bot/
+│   ├── telegram.ts   # Telegram bot (grammy)
+│   ├── whatsapp.ts   # WhatsApp bot (baileys)
+│   └── index.ts      # Bot exports
 └── components/       # 12 Ink components (TUI)
 ```
 
-**Stack**: Bun + TypeScript + Ink (React for CLI) + Drizzle ORM + SQLite + Tree-sitter + vscode-languageserver
+**Stack**: Bun + TypeScript + Ink (React for CLI) + Drizzle ORM + SQLite + Tree-sitter + vscode-languageserver + grammy (Telegram) + baileys (WhatsApp)
 
 ## Development
 
@@ -149,6 +202,23 @@ Pastikan cuma 1 instance jalan. Hapus `data/opencode.db-wal` dan `data/opencode.
 ### Bun version
 Butuh Bun >= 1.1.0. Cek: `bun --version`
 
+### Bot Issues
+
+**Telegram bot not starting:**
+- Cek token: `/config` → lihat `bot.telegram_token`
+- Pastikan token valid dari @BotFather
+- Cek log error di terminal
+
+**WhatsApp QR not showing:**
+- Hapus folder `data/whatsapp_auth` dan coba lagi
+- Pastikan versi WhatsApp di HP support WhatsApp Web
+- Baileys kadang butuh update: `bun add @whiskeysockets/baileys@latest`
+
+**Bot not responding:**
+- Cek apakah bot masih jalan (lihat log terminal)
+- Restart app kalau bot hang
+- Pastikan API key valid dan punya quota
+
 ## Roadmap
 
 - [ ] Cloud sync (supabase/firebase)
@@ -156,6 +226,9 @@ Butuh Bun >= 1.1.0. Cek: `bun --version`
 - [ ] Plugin system
 - [ ] MCP server support
 - [ ] Themes kustom
+- [x] NVIDIA NIM / OpenAI-compatible endpoints
+- [x] Telegram bot
+- [x] WhatsApp bot (Baileys)
 
 ## Lisensi
 

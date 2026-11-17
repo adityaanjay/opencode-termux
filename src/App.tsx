@@ -384,6 +384,35 @@ export const App: React.FC = () => {
       case 'clear':
         setState(s => ({ ...s, messages: [] }));
         break;
+      case 'bot': {
+        const botArgs = args.split(' ');
+        const botCommand = botArgs[0];
+        const botArg = botArgs.slice(1).join(' ');
+
+        switch (botCommand) {
+          case 'telegram': {
+            const { startTelegramBot } = await import('./bot/telegram.js');
+            addToast('info', 'Starting Telegram bot...');
+            startTelegramBot().catch(e => addToast('error', `Telegram bot error: ${e.message}`));
+            break;
+          }
+          case 'whatsapp': {
+            const { startWhatsAppBot } = await import('./bot/whatsapp.js');
+            addToast('info', 'Starting WhatsApp bot... (scan QR on first run)');
+            startWhatsAppBot().catch(e => addToast('error', `WhatsApp bot error: ${e.message}`));
+            break;
+          }
+          case 'stop':
+            addToast('warning', 'Bot stop not implemented yet. Restart app to stop bots.');
+            break;
+          case 'status':
+            addToast('info', 'Bot status: check logs for details');
+            break;
+          default:
+            addToast('warning', `Usage: /bot <telegram|whatsapp|stop|status>`);
+        }
+        break;
+      }
       default:
         addToast('warning', `Unknown command: /${command}`);
     }
@@ -492,8 +521,17 @@ export const App: React.FC = () => {
               <Text><Text bold>Tab</Text> - Switch agent (build/plan/general)</Text>
               <Text><Text bold>!</Text> - Run shell command</Text>
               <Text><Text bold>@</Text> - Read file</Text>
-              <Text><Text bold>/</Text> - Slash commands (help, session, config, agent, new, clear)</Text>
-              <Text><Text bold>?</Text> - Show this help</Text>
+              <Text><Text bold>/</Text> - Slash commands:</Text>
+              <Text>  <Text bold>help</Text> / <Text bold>?</Text> - This help</Text>
+              <Text>  <Text bold>session</Text> - List sessions</Text>
+              <Text>  <Text bold>config</Text> - Settings (API key, model, etc.)</Text>
+              <Text>  <Text bold>agent</Text> - Switch agent</Text>
+              <Text>  <Text bold>new</Text> - New session</Text>
+              <Text>  <Text bold>clear</Text> - Clear chat</Text>
+              <Text>  <Text bold>bot telegram</Text> - Start Telegram bot</Text>
+              <Text>  <Text bold>bot whatsapp</Text> - Start WhatsApp bot</Text>
+              <Text>  <Text bold>bot stop</Text> - Stop bots (restart app)</Text>
+              <Text>  <Text bold>bot status</Text> - Bot status</Text>
               <Text><Text bold>Esc</Text> - Cancel/Close</Text>
             </Box>
             <Text marginTop={2} color="gray" dimColor>Press Esc to close</Text>
@@ -538,8 +576,17 @@ export const App: React.FC = () => {
               <Text><Text bold>Tab</Text> - Switch agent</Text>
               <Text><Text bold>!</Text> - Run command</Text>
               <Text><Text bold>@</Text> - Read file</Text>
-              <Text><Text bold>/</Text> - Slash commands</Text>
-              <Text><Text bold>?</Text> - This help</Text>
+              <Text><Text bold>/</Text> - Slash commands:</Text>
+              <Text>  <Text bold>help</Text> / <Text bold>?</Text> - This help</Text>
+              <Text>  <Text bold>session</Text> - List sessions</Text>
+              <Text>  <Text bold>config</Text> - Settings</Text>
+              <Text>  <Text bold>agent</Text> - Switch agent</Text>
+              <Text>  <Text bold>new</Text> - New session</Text>
+              <Text>  <Text bold>clear</Text> - Clear chat</Text>
+              <Text>  <Text bold>bot telegram</Text> - Start Telegram bot</Text>
+              <Text>  <Text bold>bot whatsapp</Text> - Start WhatsApp bot</Text>
+              <Text>  <Text bold>bot stop</Text> - Stop bots</Text>
+              <Text>  <Text bold>bot status</Text> - Bot status</Text>
               <Text><Text bold>Esc</Text> - Close</Text>
             </Box>
           </Box>
