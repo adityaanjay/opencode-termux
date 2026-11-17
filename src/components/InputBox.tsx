@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Text, Box, useInput, useStdout } from 'ink';
 import TextInput from 'ink-text-input';
 
@@ -28,7 +28,6 @@ export const InputBox: React.FC<InputBoxProps> = ({
   const { write } = useStdout();
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [showError, setShowError] = useState(false);
-  const textareaRef = useRef<TextInput>(null);
 
   useInput((input, key) => {
     if (disabled) return;
