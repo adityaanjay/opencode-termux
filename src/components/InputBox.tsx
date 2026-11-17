@@ -77,7 +77,6 @@ export const InputBox: React.FC<InputBoxProps> = ({
       {mode === 'command' && <Text color="yellow">! </Text>}
       {mode === 'file' && <Text color="cyan">@ </Text>}
       <TextInput
-        ref={textareaRef}
         value={value}
         onChange={onChange}
         placeholder={placeholder}
