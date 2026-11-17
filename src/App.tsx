@@ -372,9 +372,37 @@ export const App: React.FC = () => {
       case 'session':
         setState(s => ({ ...s, screen: 'session-list' }));
         break;
-      case 'config':
-        setState(s => ({ ...s, screen: 'settings' }));
+      case 'config': {
+        if (!args) {
+          setState(s => ({ ...s, screen: 'settings' }));
+          break;
+        }
+        const configParts = args.split(' ');
+        const key = configParts[0];
+        const value = configParts.slice(1).join(' ');
+
+        // Map short keys to settings keys
+        const keyMap: Record<string, string> = {
+          provider: 'ai.provider',
+          api_key: 'ai.api_key',
+          base_url: 'ai.base_url',
+          model: 'ai.model',
+          temperature: 'ai.temperature',
+          max_tokens: 'ai.max_tokens',
+          telegram_token: 'bot.telegram_token',
+          telegram_allowed_users: 'bot.telegram_allowed_users',
+        };
+
+        const settingKey = keyMap[key] || `ai.${key}`;
+
+        try {
+          await db.update(settings).set({ value: `"${value}"` }).where(eq(settings.key, settingKey));
+          addToast('success', `Set ${settingKey} = ${value}`);
+        } catch (e) {
+          addToast('error', `Failed to set config: ${e instanceof Error ? e.message : 'Unknown error'}`);
+        }
         break;
+      }
       case 'agent':
         setState(s => ({ ...s, showAgentSelector: true }));
         break;
